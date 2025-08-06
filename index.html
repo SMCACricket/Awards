@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMCA LeaderBoard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Global Styles and Reset */
+        body {
+            font-family: 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Watermark for Logo (adjust path if needed) */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('SMCA_logo.jpg'); /* Ensure this path is correct */
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: 40%;
+            opacity: 0.20;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Main Heading */
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.8em;
+            margin-top: 30px;
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            max-width: 900px;
+            background-color: #2c3e50;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .nav-button {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 15px 25px;
+            transition: 0.3s;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #f4f7f6;
+            flex-grow: 1;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .nav-button:hover {
+            background-color: #34495e;
+        }
+
+        .nav-button.active {
+            background-color: #007bff;
+            color: white;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Page Containers */
+        .page-content {
+            display: none; /* Hidden by default */
+            width: 100%;
+            max-width: 900px;
+            box-sizing: border-box;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-content.active {
+            display: flex;
+        }
+
+        /* Section Headings for Leaderboard/Submissions */
+        .page-content h2 {
+            color: #007bff;
+            font-size: 2em;
+            margin-top: 40px;
+            margin-bottom: 25px;
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            width: 100%;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden; /* Ensures rounded corners on table */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f8f8f8;
+            color: #555;
+            font-weight: 600;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+
+        /* Alternating row colors for readability */
+        tbody tr:nth-child(odd) {
+            background-color: #fdfdfd;
+        }
+
+        tbody tr:hover {
+            background-color: #eef7ff;
+            cursor: default;
+        }
+
+        /* Specific column styling */
+        td.figures, td.score {
+            font-weight: 600;
+            color: #333;
+        }
+        td.player-name {
+            font-weight: 700;
+            color: #0056b3;
+        }
+        td.division {
+            font-style: italic;
+            color: #666;
+        }
+
+        /* No data message & Loading Indicators */
+        .no-data, .loading-message {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-style: italic;
+        }
+
+        /* My Submissions specific styles */
+        .submission-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .submission-filters div {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .submission-filters label {
+            display: block;
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .submission-filters select,
+        .submission-filters input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dcdcdc;
+            border-radius: 6px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .submission-filters select:focus,
+        .submission-filters input[type="text"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+        }
+
+        .submission-filters button {
+            padding: 12px 25px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .submission-filters button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        #matchHistoryResults {
+            width: 100%;
+            margin-top: 20px;
+        }
+        #matchHistoryResults p {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+        }
+
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 2em;
+                margin-bottom: 30px;
+            }
+            .page-content {
+                padding: 15px;
+            }
+            h2 {
+                font-size: 1.6em;
+                margin-top: 30px;
+                margin-bottom: 20px;
+            }
+            th, td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            /* Make tables scrollable on small screens */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            thead, tbody, th, td, tr {
+                display: block;
+            }
+            tr {
+                margin-bottom: 15px;
+                border: 1px solid #eee;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            td {
+                border: none;
+                position: relative;
+                padding-left: 50%; /* Space for pseudo-element label */
+                text-align: right;
+            }
+            td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 45%;
+                padding-left: 10px;
+                font-weight: bold;
+                text-align: left;
+                color: #777;
+            }
+            /* Specific adjustments for responsive table headers */
+            td.player-name::before { content: "Player"; }
+            td.figures::before { content: "Figures"; }
+            td.score::before { content: "Score"; }
+            td.ground::before { content: "Ground"; }
+            td.division::before { content: "Division"; }
+            td.date::before { content: "Date"; }
+            td.round::before { content: "Round"; } /* Added for My Submissions */
+            td.match::before { content: "Match"; } /* Added for My Submissions */
+
+            /* My Submissions filters responsive */
+            .submission-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .submission-filters div {
+                min-width: unset;
+            }
+            .submission-filters button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>SMCA Awards 2025</h1>
+
+    <div class="navbar">
+        <button type="button" class="nav-button active" id="leaderboardNavBtn">Leaderboard</button>
+        <button type="button" class="nav-button" id="mySubmissionsNavBtn">My Submissions</button>
+    </div>
+
+    <!-- Leaderboard Page -->
+    <div id="leaderboardPage" class="page-content active">
+        <h2>5 Wicket Hauls</h2>
+        <div id="five-wicket-hauls-table-container">
+            <p class="loading-message">Loading 5 Wicket Hauls...</p>
+        </div>
+
+        <h2>Hat Tricks</h2>
+        <div id="hat-tricks-table-container">
+            <p class="loading-message">Loading Hat Tricks...</p>
+        </div>
+
+        <h2>Centuries</h2>
+        <div id="centuries-table-container">
+            <p class="loading-message">Loading Centuries...</p>
+        </div>
+    </div>
+
+    <!-- My Submissions Page -->
+    <div id="matchHistoryPage" class="page-content">
+        <h2>My Submissions History</h2>
+        <div class="submission-filters">
+            <div>
+                <label for="historyDivision">Division:</label>
+                <select id="historyDivision">
+                    <option value="">Select Division</option>
+                    <option value="Division 1">Division 1</option>
+                    <option value="Division 2">Division 2</option>
+                    <option value="Division 3">Division 3</option>
+                    <option value="Division 4">Division 4</option>
+                    <option value="Division 5">Division 5</option>
+                    <option value="Division 6">Division 6</option>
+                    <option value="Division 7">Division 7</option>
+                    <option value="Division 8">Division 8</option>
+                    <option value="Division 9">Division 9</option>
+                    <option value="Division 10">Division 10</option>
+                    <option value="Division 11">Division 11</option>
+                    <option value="Division 12">Division 12</option>
+                    <option value="Division 13">Division 13</option>
+                    <option value="Division 14">Division 14</option>
+                    <option value="Division 15">Division 15</option>
+                    <option value="Division 16">Division 16</option>
+                    <option value="Division 17">Division 17</option>
+                    <option value="Division 18">Division 18</option>
+                    <option value="Division 19">Division 19</option>
+                    <option value="Division 20">Division 20</option>
+                    <option value="Division 21">Division 21</option>
+                    <option value="Division 22">Division 22</option>
+                    <option value="Division 23">Division 23</option>
+                    <option value="Division 24">Division 24</option>
+                    <option value="Division 25">Division 25</option>
+                    <option value="Division 26">Division 26</option>
+                </select>
+            </div>
+            <div>
+                <label for="historyTeam">Team:</label>
+                <select id="historyTeam">
+                    <option value="">Select Team</option>
+                    <!-- Teams will be populated dynamically based on division -->
+                </select>
+            </div>
+            <button id="viewHistoryBtn">View Matches</button>
+        </div>
+
+        <div id="matchHistoryResults">
+            <p class="loading-message">Select a Division and Team to view their submission history.</p>
+            <!-- Table will be populated here dynamically -->
+        </div>
+    </div>
+
+    <script>
+        let divisionTeamsDataCache = []; // Cache for teams per division for history tab dropdowns
+        // IMPORTANT: Replace with the URL of your deployed display_script.gs
+        const DISPLAY_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyRNzUwLZ-A4NPNEnqS4aCu0_5ZjEPJY9DVvWHhHt1C77MLvebGpo5JkiJ4vRNJMj8hTQ/exec';
+
+        // Function to switch between main pages (Leaderboard vs. My Submissions)
+        function showPage(pageId, clickedButton) {
+            // Hide all page contents
+            const allPages = document.querySelectorAll('.page-content');
+            allPages.forEach(page => page.classList.remove('active'));
+
+            // Show the selected page
+            document.getElementById(pageId).classList.add('active');
+
+            // Deactivate all nav buttons
+            const navButtons = document.querySelectorAll('.nav-button');
+            navButtons.forEach(button => button.classList.remove('active'));
+
+            // Activate the clicked button
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+
+            // If switching to leaderboard, trigger data load for specific leaderboards
+            if (pageId === 'leaderboardPage') {
+                loadLeaderboardData('5 Wicket Hauls', 'five-wicket-hauls-table-container');
+                loadLeaderboardData('Hat Tricks', 'hat-tricks-table-container');
+                loadLeaderboardData('Centuries', 'centuries-table-container');
+            }
+            // If switching to match history, ensure team dropdown is populated
+            if (pageId === 'matchHistoryPage') {
+                const selectedHistoryDivision = document.getElementById('historyDivision').value;
+                if (selectedHistoryDivision) {
+                    fetchAndPopulateHistoryTeams(selectedHistoryDivision);
+                } else {
+                    const historyTeamDropdown = document.getElementById('historyTeam');
+                    historyTeamDropdown.innerHTML = '<option value="">Select Division first</option>';
+                    historyTeamDropdown.disabled = true;
+                }
+            }
+        }
+
+        // --- JavaScript functions for My Submissions page ---
+        async function fetchAndPopulateHistoryTeams(selectedDivision) {
+            const historyTeamDropdown = document.getElementById('historyTeam');
+            historyTeamDropdown.innerHTML = '<option value="">Loading teams...</option>';
+            historyTeamDropdown.disabled = true;
+
+            if (!selectedDivision) {
+                historyTeamDropdown.innerHTML = '<option value="">Select Division first</option>';
+                historyTeamDropdown.disabled = true;
+                return;
+            }
+
+            // A simple cache check, could be improved for specific division caching
+            if (divisionTeamsDataCache.length === 0 || !divisionTeamsDataCache.some(item => item[0] === selectedDivision)) {
+                try {
+                    // This fetches teams from the display script, using 'sheetname' parameter
+                    const response = await fetch(`${DISPLAY_SCRIPT_URL}?sheetname=${encodeURIComponent(selectedDivision)}`, {
+                        mode: 'cors' // Explicitly set CORS mode
+                    });
+                    const data = await response.json();
+                    divisionTeamsDataCache = data.teams || [];
+                } catch (error) {
+                    console.error('Error fetching history teams:', error);
+                    historyTeamDropdown.innerHTML = '<p style="color: red;">Error loading teams</p>'; // Display error in dropdown
+                    historyTeamDropdown.disabled = true;
+                    return;
+                }
+            }
+
+            historyTeamDropdown.innerHTML = '';
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.text = "Select Team";
+            historyTeamDropdown.add(defaultOption);
+
+            const teamsInDivision = divisionTeamsDataCache.filter(item => item[0] === selectedDivision);
+            const uniqueTeams = [...new Set(teamsInDivision.map(item => item[1]))].sort();
+
+            uniqueTeams.forEach(teamName => {
+                const option = document.createElement("option");
+                option.text = teamName;
+                option.value = teamName;
+                historyTeamDropdown.add(option);
+            });
+
+            if (uniqueTeams.length === 0) {
+                historyTeamDropdown.innerHTML = '<option value="">No teams in this division</option>';
+                historyTeamDropdown.disabled = true;
+            } else {
+                historyTeamDropdown.disabled = false;
+            }
+        }
+
+        document.getElementById('historyDivision').addEventListener('change', async (event) => {
+            const selectedDivision = event.target.value;
+            document.getElementById('matchHistoryResults').innerHTML = '<p class="loading-message">Select a Division and Team to view their submission history.</p>';
+            await fetchAndPopulateHistoryTeams(selectedDivision);
+        });
+
+        document.getElementById('viewHistoryBtn').addEventListener('click', async () => {
+            const selectedDivision = document.getElementById('historyDivision').value;
+            const selectedTeam = document.getElementById('historyTeam').value;
+            const resultsDiv = document.getElementById('matchHistoryResults');
+
+            if (!selectedDivision || !selectedTeam) {
+                resultsDiv.innerHTML = '<p style="color: red;">Please select both a Division and a Team.</p>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '<p class="loading-message">Loading match history for ' + selectedTeam + ' in ' + selectedDivision + '...</p>';
+
+            try {
+                // This fetches submission history from the display script
+                const response = await fetch(`${DISPLAY_SCRIPT_URL}?division=${encodeURIComponent(selectedDivision)}&teamName=${encodeURIComponent(selectedTeam)}`, {
+                    mode: 'cors' // Explicitly set CORS mode
+                });
+                const result = await response.json();
+
+                if (result.error) {
+                    resultsDiv.innerHTML = `<p style="color: red;">Error: ${result.error}</p>`;
+                    console.error("API Error:", result.error);
+                    return;
+                }
+
+                const filteredData = result.data;
+
+                if (filteredData && filteredData.length > 0) {
+                    let tableHtml = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="timestamp">Date</th>
+                                    <th class="division">Division</th>
+                                    <th class="team">Team Name</th>
+                                    <th class="round">Round</th>
+                                    <th class="match">Match</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    filteredData.forEach(row => {
+                        tableHtml += `
+                            <tr>
+                                <td data-label="Date" class="timestamp">${row.timestamp}</td>
+                                <td data-label="Division" class="division">${row.division}</td>
+                                <td data-label="Team Name" class="team">${row.teamName}</td>
+                                <td data-label="Round" class="round">${row.round}</td>
+                                <td data-label="Match" class="match">${row.match}</td>
+                            </tr>
+                        `;
+                    });
+                    tableHtml += `</tbody></table>`;
+                    resultsDiv.innerHTML = tableHtml;
+                } else {
+                    resultsDiv.innerHTML = '<p class="no-data">No submission history found for this team in the selected division.</p>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '<p style="color: red;">Failed to load history. Please try again later.</p>';
+                console.error("Fetch history error:", error);
+            }
+        });
+
+        // --- JavaScript functions for Leaderboard page ---
+        async function loadLeaderboardData(leaderboardType, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<p class="loading-message">Loading ${leaderboardType} data...</p>`;
+
+            let headersToDisplay = []; // Keys from the API response that we want to display
+            let columnTitles = [];    // Corresponding human-readable column titles for the table
+
+            // Determine headers and data labels based on leaderboardType
+            if (leaderboardType === '5 Wicket Hauls') {
+                headersToDisplay = ['player', 'figures', 'ground', 'team', 'division'];
+                columnTitles = ['Player', 'Figures', 'Ground', 'Team' ,'Division'];
+            } else if (leaderboardType === 'Hat Tricks') {
+                headersToDisplay = ['player', 'figures', 'ground', 'team', 'division'];
+                columnTitles = ['Player', 'Figures', 'Ground', 'Team','Division'];
+            } else if (leaderboardType === 'Centuries') {
+                headersToDisplay = [ 'player', 'score', 'ground', 'team','division'];
+                columnTitles = ['Player', 'Score', 'Ground', 'Team','Division'];
+            } else {
+                container.innerHTML = `<p style="color: red;">Unknown leaderboard type: ${leaderboardType}</p>`;
+                return;
+            }
+
+            try {
+                // Fetch data for the specific leaderboard type from the display script
+                const response = await fetch(`${DISPLAY_SCRIPT_URL}?type=leaderboard&leaderboardType=${encodeURIComponent(leaderboardType)}`, {
+                    mode: 'cors' // Explicitly set CORS mode
+                });
+                const result = await response.json();
+
+                if (result.error) {
+                    container.innerHTML = `<p style="color: red;">Error loading ${leaderboardType}: ${result.error}</p>`;
+                    console.error(`API Error for ${leaderboardType}:`, result.error);
+                    return;
+                }
+
+                const data = result.data;
+
+                if (data && data.length > 0) {
+                    let tableHtml = `<table><thead><tr>`;
+                    // Generate table headers
+                    columnTitles.forEach(title => {
+                        tableHtml += `<th>${title}</th>`;
+                    });
+                    tableHtml += `</tr></thead><tbody>`;
+
+                    data.forEach(row => {
+                        tableHtml += `<tr>`;
+                        headersToDisplay.forEach(key => {
+                            const value = row[key] !== undefined ? row[key] : '';
+                            // Use the column title as the data-label for responsiveness
+                            const dataLabel = columnTitles[headersToDisplay.indexOf(key)];
+                            tableHtml += `<td data-label="${dataLabel}">${value}</td>`;
+                        });
+                        tableHtml += `</tr>`;
+                    });
+                    tableHtml += `</tbody></table>`;
+                    container.innerHTML = tableHtml;
+                } else {
+                    container.innerHTML = `<p class="no-data">No ${leaderboardType} data available yet.</p>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<p style="color: red;">Failed to load ${leaderboardType}. Please try again later.</p>`;
+                console.error(`Fetch error for ${leaderboardType}:`, error);
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Attach event listeners to navigation buttons
+            document.getElementById('leaderboardNavBtn').addEventListener('click', function() {
+                showPage('leaderboardPage', this);
+            });
+            document.getElementById('mySubmissionsNavBtn').addEventListener('click', function() {
+                showPage('matchHistoryPage', this);
+            });
+
+            // Show the initial page (leaderboardPage) and activate its button
+            showPage('leaderboardPage', document.getElementById('leaderboardNavBtn'));
+        });
+    </script>
+</body>
+</html>
