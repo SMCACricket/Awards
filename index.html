@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         /* Custom styles to handle the active class toggled by JS */
-        /* This keeps the JavaScript functionality working without changes */
         .nav-button.active {
             background-color: #3b82f6; /* A vibrant blue for the active state */
             color: white;
@@ -19,11 +18,16 @@
 </head>
 <body class="bg-slate-900 text-slate-200 font-inter min-h-screen flex flex-col items-center p-4 md:p-8">
 
+    <!-- Back to Home Button -->
+    <a href="https://smcacricket.github.io/SMCACricket/" class="fixed top-4 left-4 z-20">
+        <button class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold py-2 px-4 rounded-lg shadow-md transition-colors">
+            &larr; Back to Home
+        </button>
+    </a>
+
     <!-- Watermark - SMCA Logo placeholder -->
-    <!-- The user's original watermark was a fixed path, which may not work. -->
-    <!-- This is a placeholder for a functional logo image. -->
-    <!-- You can replace the src with your actual logo URL. -->
-    <div class="fixed inset-0 bg-[url('https://placehold.co/1000x1000/1e293b/475569?text=SMCA')] bg-no-repeat bg-center bg-[40%] opacity-20 pointer-events-none z-0"></div>
+    <!-- The watermark now uses a lighter text color (#94a3b8 which is slate-400) to be visible against the dark background. -->
+    <div class="fixed inset-0 bg-[url('https://placehold.co/1000x1000/1e293b/94a3b8?text=SMCA')] bg-no-repeat bg-center bg-[40%] opacity-20 pointer-events-none z-0"></div>
 
     <h1 class="text-white text-3xl md:text-5xl font-bold mt-8 mb-10 tracking-wide text-center drop-shadow-md z-10">SMCA Awards 2025</h1>
 
